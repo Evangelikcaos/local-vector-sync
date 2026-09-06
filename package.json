@@ -1,0 +1,78 @@
+{
+  "name": "local-vector-sync",
+  "version": "0.1.0",
+  "description": "A local-first, privacy-native embedded vector search engine for offline semantic search, with optional encrypted incremental sync to S3-compatible storage (AWS S3, Cloudflare R2).",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    },
+    "./sync/s3": {
+      "types": "./dist/sync/s3.d.ts",
+      "require": "./dist/sync/s3.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "all": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "vector-database",
+    "embeddings",
+    "semantic-search",
+    "local-first",
+    "offline",
+    "privacy",
+    "wasm",
+    "tauri",
+    "electron",
+    "react-native",
+    "cosine-similarity",
+    "vector-search",
+    "s3",
+    "cloudflare-r2"
+  ],
+  "license": "MIT",
+  "author": "Eduar",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Evangelikcaos/local-vector-sync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Evangelikcaos/local-vector-sync/issues"
+  },
+  "homepage": "https://github.com/Evangelikcaos/local-vector-sync#readme",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/Evangelikcaos"
+    },
+    {
+      "type": "open_collective",
+      "url": "https://opencollective.com/local-vector-sync"
+    },
+    {
+      "type": "buy_me_a_coffee",
+      "url": "https://www.buymeacoffee.com/evangelikcaos"
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.699.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

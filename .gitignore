@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+*.lvs-index.json
+*.lvs-index.json.tmp
+.env

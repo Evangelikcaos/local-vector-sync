@@ -2,4 +2,6 @@
 
 github: [Evangelikcaos]
 open_collective: local-vector-sync
-custom: ["https://www.buymeacoffee.com/evangelikcaos"]
+custom:
+  - "https://www.buymeacoffee.com/evangelikcaos"
+  - "https://www.paypal.com/ncp/payment/KN78NFJJBQFEY"

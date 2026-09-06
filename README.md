@@ -8,6 +8,7 @@
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/Evangelikcaos)
 [![Open Collective](https://img.shields.io/badge/Open%20Collective-support-3385FF?logo=opencollective)](https://opencollective.com/local-vector-sync)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/evangelikcaos)
+[![PayPal](https://img.shields.io/badge/PayPal-donate-00457C?logo=paypal&logoColor=white)](https://www.paypal.com/ncp/payment/KN78NFJJBQFEY)
 
 LocalVectorSync lets apps built with **Tauri, Electron, React Native, or plain Node.js** run semantic search entirely **on-device** — no external vector database, no network round-trip, no user data ever leaving the machine by default. When the device *is* online and the user opts in, an optional sync module pushes an **encrypted** copy of the index to any S3-compatible bucket (AWS S3, Cloudflare R2, MinIO) so it can be restored on another device.
 
@@ -122,6 +123,13 @@ LocalVectorSync is **100% open-source under the MIT license** and free to use in
 - **[GitHub Sponsors](https://github.com/sponsors/Evangelikcaos)** — recurring or one-time, no platform fee to the maintainer.
 - **[Open Collective](https://opencollective.com/local-vector-sync)** — transparent finances, ideal if your company wants a receipt/invoice.
 - **[Buy Me a Coffee](https://www.buymeacoffee.com/evangelikcaos)** — quick one-off support.
+- **[PayPal](https://www.paypal.com/ncp/payment/KN78NFJJBQFEY)** — a direct one-off donation, no account needed.
+
+<p align="center">
+  <a href="https://www.paypal.com/ncp/payment/KN78NFJJBQFEY">
+    <img src="./paypal-qr.png" width="140" alt="Scan to donate via PayPal">
+  </a>
+</p>
 
 See [DONATIONS.md](./DONATIONS.md) for the full roadmap this funds and what sponsors get in return.
 

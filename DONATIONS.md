@@ -9,8 +9,9 @@ LocalVectorSync is maintained as a community-funded, 100% open-source (MIT) proj
 | **[GitHub Sponsors](https://github.com/sponsors/Evangelikcaos)** | Individual developers who want recurring or one-time support with zero platform fee taken from the maintainer's side. |
 | **[Open Collective](https://opencollective.com/local-vector-sync)** | Companies that need a transparent, auditable ledger of funds in and out, and/or an invoice for accounting. |
 | **[Buy Me a Coffee](https://www.buymeacoffee.com/evangelikcaos)** | A quick, no-account-needed one-off thank-you. |
+| **[PayPal](https://www.paypal.com/ncp/payment/KN78NFJJBQFEY)** | A direct one-off donation for anyone who already has PayPal and doesn't need a platform account or receipt. |
 
-All three are linked from the repository's "Sponsor" button (via `.github/FUNDING.yml`) and from the README.
+All four are linked from the repository's "Sponsor" button (via `.github/FUNDING.yml`) and from the README.
 
 ## What sponsors get
 

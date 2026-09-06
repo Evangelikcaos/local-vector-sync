@@ -60,6 +60,16 @@ await engine.save();
 
 Every write path validates vector dimension and rejects non-finite values before touching stored state, and `save()` writes through a temp file + atomic rename so a crash mid-write can never leave a corrupted index on disk.
 
+## Search acceleration (optional, automatic)
+
+`search()` has an optional Rust/WebAssembly-accelerated path for its hot loop (cosine similarity + top-K ranking), implemented in the [`rust/`](./rust) crate and compiled with `wasm-bindgen`. It's used automatically — no setup, no flag — once a corpus is large enough that the WASM boundary crossing pays for itself, and only when no `filter` is given (a filter predicate is arbitrary JS and can't cross into WASM). Below that threshold, with a filter, or on any platform/runtime where the compiled module fails to load for any reason, `search()` transparently falls back to the pure-TypeScript implementation — same results, just slower. This is a pure performance optimization: there is no code path where WASM being unavailable changes behavior or breaks a build.
+
+```ts
+import { loadWasmAccel } from "local-vector-sync";
+
+console.log(loadWasmAccel() !== null ? "WASM acceleration active" : "using pure-TypeScript search");
+```
+
 ## Encrypted sync (optional)
 
 ```ts
@@ -123,6 +133,8 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+The generated WASM bindings in `src/wasm/` are committed, so the steps above never require a Rust toolchain. If you change the Rust crate in `rust/`, see [`rust/README.md`](./rust/README.md) for how to rebuild them (`npm run build:wasm`) and `npm run test:rust` for the crate's own unit tests.
 
 Issues and PRs welcome. Please add a test for any behavior change — the engine and sync module are both covered by real fixtures and round-trip tests, not mocks of the logic under test.
 

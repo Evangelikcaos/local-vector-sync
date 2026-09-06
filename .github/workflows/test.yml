@@ -34,3 +34,16 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  rust:
+    name: Rust crate tests (native)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run Rust unit tests
+        run: cargo test --manifest-path rust/Cargo.toml

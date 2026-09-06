@@ -22,9 +22,12 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && npm run copy:wasm",
+    "copy:wasm": "mkdir -p dist/wasm && cp src/wasm/*.js src/wasm/*.wasm src/wasm/*.d.ts dist/wasm/",
+    "build:wasm": "cd rust && cargo build --target wasm32-unknown-unknown --release && wasm-bindgen --target nodejs --out-dir ../src/wasm --out-name local_vector_sync_core target/wasm32-unknown-unknown/release/local_vector_sync_core.wasm",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:rust": "cd rust && cargo test",
     "all": "npm run typecheck && npm run test && npm run build"
   },
   "keywords": [

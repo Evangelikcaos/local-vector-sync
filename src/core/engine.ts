@@ -14,8 +14,17 @@ import type {
   VectorRecord,
   VectorRecordInput,
 } from "../types";
+import { loadWasmAccel } from "./wasmAccel";
 
 const FORMAT_VERSION = 1 as const;
+
+/**
+ * Below this corpus size, the pure-TypeScript scan is already sub-millisecond
+ * and the cost of marshalling data into a flat Float32Array to cross the
+ * WASM boundary isn't worth paying. Above it, the WASM accelerator (when
+ * available) is used instead. This only ever affects speed, never results.
+ */
+const WASM_ACCEL_MIN_CORPUS_SIZE = 32;
 
 /**
  * Cosine similarity between two equal-length vectors, in [-1, 1].
@@ -164,6 +173,20 @@ export class LocalVectorEngine {
     const minScore = options.minScore ?? -Infinity;
     const includeVectors = options.includeVectors ?? false;
 
+    // The WASM accelerator has no notion of an arbitrary JS `filter`
+    // predicate, so it's only used when none is given. Below the size
+    // threshold, applying `minScore` after taking `topK` from WASM is
+    // equivalent to filtering first (minScore only ever removes the lowest-
+    // scoring tail, which can never displace a higher-scoring item already
+    // inside the top K), so this never changes results versus the pure-JS
+    // path — only speed.
+    if (!options.filter && this.records.size >= WASM_ACCEL_MIN_CORPUS_SIZE) {
+      const accelerated = this.searchWithWasmAccel(queryVector, topK, minScore, includeVectors);
+      if (accelerated) {
+        return accelerated;
+      }
+    }
+
     const scored: SearchResult[] = [];
     for (const record of this.records.values()) {
       if (options.filter && !options.filter(record.metadata)) {
@@ -182,6 +205,57 @@ export class LocalVectorEngine {
 
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, topK);
+  }
+
+  /**
+   * Attempts the search via the optional Rust/WASM accelerator. Returns
+   * `null` if the accelerator isn't available or the call fails for any
+   * reason, so `search()` can fall back to the pure-TypeScript path — this
+   * must never be the only way search results can be produced.
+   */
+  private searchWithWasmAccel(
+    queryVector: number[],
+    topK: number,
+    minScore: number,
+    includeVectors: boolean
+  ): SearchResult[] | null {
+    const accel = loadWasmAccel();
+    if (!accel) {
+      return null;
+    }
+    try {
+      const ids: string[] = new Array(this.records.size);
+      const flat = new Float32Array(this.records.size * this.dimension);
+      let i = 0;
+      for (const record of this.records.values()) {
+        ids[i] = record.id;
+        flat.set(record.vector, i * this.dimension);
+        i++;
+      }
+      const query = Float32Array.from(queryVector);
+      const pairs = accel.topKCosine(query, flat, this.dimension, topK);
+
+      const results: SearchResult[] = [];
+      for (let p = 0; p < pairs.length; p += 2) {
+        const score = pairs[p + 1]!;
+        if (score < minScore) {
+          continue;
+        }
+        const id = ids[pairs[p]!]!;
+        const record = this.records.get(id)!;
+        const result: SearchResult = { id: record.id, score, metadata: { ...record.metadata } };
+        if (includeVectors) {
+          result.vector = [...record.vector];
+        }
+        results.push(result);
+      }
+      return results;
+    } catch {
+      // Any failure calling into WASM (e.g. an unexpected corpus shape) —
+      // fall back to the pure-TypeScript path rather than surfacing an error
+      // for what is meant to be a transparent optimization.
+      return null;
+    }
   }
 
   /** Serializes the full engine contents (used by `save()` and by the sync module). */
@@ -316,5 +390,9 @@ function validateSerializedIndex(value: unknown): asserts value is SerializedInd
   }
 }
 
-export { cosineSimilarity as __cosineSimilarityForTesting, validateSerializedIndex as __validateSerializedIndexForTesting };
+export {
+  cosineSimilarity as __cosineSimilarityForTesting,
+  validateSerializedIndex as __validateSerializedIndexForTesting,
+  WASM_ACCEL_MIN_CORPUS_SIZE as __wasmAccelMinCorpusSizeForTesting,
+};
 export type { VectorMetadata };

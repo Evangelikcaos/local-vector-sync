@@ -46,4 +46,34 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Run Rust unit tests
-        run: cargo test --manifest-path rust/Cargo.toml
+        run: cargo test --manifest-path rust/Cargo.toml --locked
+
+  wasm-bindings-in-sync:
+    name: Verify committed WASM bindings match rust/src
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install matching wasm-bindgen-cli
+        run: |
+          version=$(grep -m1 '^name = "wasm-bindgen"' -A1 rust/Cargo.lock | grep version | sed -E 's/.*"(.*)"/\1/')
+          cargo install wasm-bindgen-cli --version "$version" --locked
+
+      - name: Rebuild bindings into a scratch dir and diff against src/wasm
+        run: |
+          cd rust
+          cargo build --target wasm32-unknown-unknown --release --locked
+          wasm-bindgen --target nodejs --out-dir /tmp/wasm-check --out-name local_vector_sync_core target/wasm32-unknown-unknown/release/local_vector_sync_core.wasm
+          cd ..
+          # Compare the generated JS/TS glue (source of truth for behavior).
+          # The .wasm binary itself can differ byte-for-byte between
+          # toolchain patch versions even with identical source, so only
+          # the human-authored-shaped glue files are diffed exactly here.
+          diff -u src/wasm/local_vector_sync_core.js /tmp/wasm-check/local_vector_sync_core.js
+          diff -u src/wasm/local_vector_sync_core.d.ts /tmp/wasm-check/local_vector_sync_core.d.ts

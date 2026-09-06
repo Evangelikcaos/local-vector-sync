@@ -99,6 +99,26 @@ export interface S3Backend {
   getObject(key: string): Promise<Buffer | null>;
 }
 
+/**
+ * "Object not found" is reported inconsistently across S3-compatible
+ * providers: real AWS S3 (recent SDK versions) surfaces `error.name ===
+ * "NoSuchKey"`, but some S3-compatible services (this package explicitly
+ * targets Cloudflare R2 and MinIO alongside AWS) or older SDK/proxy setups
+ * report only an HTTP 404 without that exact error name — that case must
+ * still resolve to `null` ("no manifest/index yet") rather than crashing
+ * `push()`/`pull()` for anyone not running against AWS itself.
+ */
+function isNotFoundError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  const candidate = error as { name?: string; $metadata?: { httpStatusCode?: number }; Code?: string };
+  if (candidate.name === "NoSuchKey" || candidate.Code === "NoSuchKey") {
+    return true;
+  }
+  return candidate.$metadata?.httpStatusCode === 404;
+}
+
 /** Real S3Backend implementation on top of @aws-sdk/client-s3. */
 export class AwsS3Backend implements S3Backend {
   private readonly client: S3Client;
@@ -144,7 +164,7 @@ export class AwsS3Backend implements S3Backend {
       }
       return Buffer.concat(chunks);
     } catch (error) {
-      if ((error as { name?: string }).name === "NoSuchKey") {
+      if (isNotFoundError(error)) {
         return null;
       }
       throw new LocalVectorSyncError(`Failed to download "${key}" from bucket "${this.bucket}": ${(error as Error).message}`, error);

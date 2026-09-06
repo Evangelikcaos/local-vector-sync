@@ -134,6 +134,33 @@ describe("LocalVectorEngine — in-memory operations", () => {
     expect(engine.get("a")!.vector).toEqual([1, 2]);
     expect(engine.get("a")!.metadata.tag).toBe("x");
   });
+
+  it("mutating the caller's original metadata object after upsert() does not affect internal state", () => {
+    // Regression test: upsert() must defensively copy `metadata` on the way
+    // in, not just on the way out (get()/search() already did the latter).
+    // Without the copy, a caller holding onto the object it passed in could
+    // silently corrupt the engine's stored data after the fact.
+    const engine = new LocalVectorEngine({ dimension: 2 });
+    const meta = { title: "Original" };
+    engine.upsert({ id: "a", vector: [1, 2], metadata: meta });
+    meta.title = "mutated-from-outside";
+    (meta as Record<string, unknown>).injected = "should not appear";
+    expect(engine.get("a")!.metadata).toEqual({ title: "Original" });
+  });
+
+  it("mutating the caller's original metadata objects after upsertMany() does not affect internal state", () => {
+    const engine = new LocalVectorEngine({ dimension: 1 });
+    const metaA = { title: "A" };
+    const metaB = { title: "B" };
+    engine.upsertMany([
+      { id: "a", vector: [1], metadata: metaA },
+      { id: "b", vector: [2], metadata: metaB },
+    ]);
+    metaA.title = "mutated-a";
+    metaB.title = "mutated-b";
+    expect(engine.get("a")!.metadata.title).toBe("A");
+    expect(engine.get("b")!.metadata.title).toBe("B");
+  });
 });
 
 describe("LocalVectorEngine — persistence", () => {

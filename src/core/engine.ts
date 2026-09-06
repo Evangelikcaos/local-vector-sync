@@ -27,6 +27,17 @@ const FORMAT_VERSION = 1 as const;
 const WASM_ACCEL_MIN_CORPUS_SIZE = 32;
 
 /**
+ * The WASM accelerator encodes each result's corpus index as an f32 (see
+ * `rust/src/lib.rs`), which stops being able to represent every integer
+ * exactly beyond 2^24. Above that corpus size, indices could silently
+ * alias to the wrong record instead of erroring, so this is treated as a
+ * hard ceiling: at or above it, `search()` always uses the pure-TypeScript
+ * path regardless of the accelerator's availability. This is far beyond
+ * the "thousands to low tens of thousands of vectors" this engine targets.
+ */
+const WASM_ACCEL_MAX_CORPUS_SIZE = 2 ** 24;
+
+/**
  * Cosine similarity between two equal-length vectors, in [-1, 1].
  *
  * A zero-magnitude vector (all zeros) has no defined direction, so cosine
@@ -114,7 +125,11 @@ export class LocalVectorEngine {
     this.records.set(record.id, {
       id: record.id,
       vector: [...record.vector],
-      metadata: record.metadata ?? {},
+      // Defensively copied: without this, mutating the caller's original
+      // `metadata` object after calling upsert() would silently corrupt
+      // the engine's internal state (the same guarantee `get()`/`search()`
+      // already provide on the way *out* must also hold on the way in).
+      metadata: { ...(record.metadata ?? {}) },
       updatedAt: now,
     });
     this.updatedAt = now;
@@ -130,7 +145,7 @@ export class LocalVectorEngine {
       this.records.set(record.id, {
         id: record.id,
         vector: [...record.vector],
-        metadata: record.metadata ?? {},
+        metadata: { ...(record.metadata ?? {}) },
         updatedAt: now,
       });
     }
@@ -180,7 +195,11 @@ export class LocalVectorEngine {
     // scoring tail, which can never displace a higher-scoring item already
     // inside the top K), so this never changes results versus the pure-JS
     // path — only speed.
-    if (!options.filter && this.records.size >= WASM_ACCEL_MIN_CORPUS_SIZE) {
+    if (
+      !options.filter &&
+      this.records.size >= WASM_ACCEL_MIN_CORPUS_SIZE &&
+      this.records.size < WASM_ACCEL_MAX_CORPUS_SIZE
+    ) {
       const accelerated = this.searchWithWasmAccel(queryVector, topK, minScore, includeVectors);
       if (accelerated) {
         return accelerated;
@@ -394,5 +413,6 @@ export {
   cosineSimilarity as __cosineSimilarityForTesting,
   validateSerializedIndex as __validateSerializedIndexForTesting,
   WASM_ACCEL_MIN_CORPUS_SIZE as __wasmAccelMinCorpusSizeForTesting,
+  WASM_ACCEL_MAX_CORPUS_SIZE as __wasmAccelMaxCorpusSizeForTesting,
 };
 export type { VectorMetadata };

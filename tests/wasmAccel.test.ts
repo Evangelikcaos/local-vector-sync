@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LocalVectorEngine } from "../src/core/engine";
-import { __wasmAccelMinCorpusSizeForTesting as WASM_ACCEL_MIN_CORPUS_SIZE } from "../src/core/engine";
+import {
+  __wasmAccelMaxCorpusSizeForTesting as WASM_ACCEL_MAX_CORPUS_SIZE,
+  __wasmAccelMinCorpusSizeForTesting as WASM_ACCEL_MIN_CORPUS_SIZE,
+} from "../src/core/engine";
 import * as wasmAccelModule from "../src/core/wasmAccel";
 import { __resetWasmAccelCacheForTesting, loadWasmAccel } from "../src/core/wasmAccel";
 
@@ -149,5 +152,13 @@ describe("LocalVectorEngine — WASM-accelerated search parity with pure TypeScr
     const results = engine.search([1, 0, 0], { topK: 5 });
     expect(results).toHaveLength(5);
     expect(results[0]!.score).toBeGreaterThanOrEqual(results[1]!.score);
+  });
+
+  it("defines the max-corpus ceiling as 2^24 (the largest exactly-representable f32 integer)", () => {
+    // The WASM accelerator encodes result indices as f32 (see rust/src/lib.rs);
+    // beyond 2^24 entries, indices could silently alias. This test pins the
+    // documented ceiling rather than exercising it directly — building an
+    // actual 16M+ record corpus in a unit test isn't practical.
+    expect(WASM_ACCEL_MAX_CORPUS_SIZE).toBe(16777216);
   });
 });

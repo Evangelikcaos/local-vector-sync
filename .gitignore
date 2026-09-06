@@ -7,4 +7,3 @@ coverage/
 *.lvs-index.json.tmp
 .env
 rust/target/
-Cargo.lock

@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { LocalVectorEngine } from "../src/core/engine";
 import { LocalVectorSyncError } from "../src/types";
-import { S3VectorSync, decryptBuffer, encryptBuffer } from "../src/sync/s3";
+import { AwsS3Backend, S3VectorSync, decryptBuffer, encryptBuffer } from "../src/sync/s3";
 import type { S3Backend } from "../src/sync/s3";
 
 describe("encryptBuffer / decryptBuffer", () => {
@@ -56,6 +56,37 @@ class InMemoryS3Backend implements S3Backend {
     return this.store.get(key) ?? null;
   }
 }
+
+describe("AwsS3Backend — not-found detection across S3-compatible providers", () => {
+  // AwsS3Backend wraps the real S3Client; these tests stub its `send` method
+  // rather than hitting real AWS/R2/MinIO, to exercise `isNotFoundError`'s
+  // branches directly (see src/sync/s3.ts for why more than one shape of
+  // "not found" has to be recognized).
+  function backendWithStubbedSend(rejection: unknown): AwsS3Backend {
+    const backend = new AwsS3Backend({ bucket: "test-bucket", region: "us-east-1" });
+    (backend as unknown as { client: { send: unknown } }).client.send = vi.fn().mockRejectedValue(rejection);
+    return backend;
+  }
+
+  it("treats an AWS-style NoSuchKey error as not-found", async () => {
+    const backend = backendWithStubbedSend(Object.assign(new Error("no such key"), { name: "NoSuchKey" }));
+    await expect(backend.getObject("missing")).resolves.toBeNull();
+  });
+
+  it("treats a bare HTTP 404 (no NoSuchKey error name) as not-found, for R2/MinIO-style responses", async () => {
+    const backend = backendWithStubbedSend(
+      Object.assign(new Error("not found"), { $metadata: { httpStatusCode: 404 } })
+    );
+    await expect(backend.getObject("missing")).resolves.toBeNull();
+  });
+
+  it("still surfaces a real failure (e.g. access denied) as LocalVectorSyncError, not a silent null", async () => {
+    const backend = backendWithStubbedSend(
+      Object.assign(new Error("access denied"), { name: "AccessDenied", $metadata: { httpStatusCode: 403 } })
+    );
+    await expect(backend.getObject("some-key")).rejects.toThrow(LocalVectorSyncError);
+  });
+});
 
 describe("S3VectorSync", () => {
   it("restoreInto returns false when nothing has been pushed yet", async () => {

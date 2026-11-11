@@ -154,8 +154,7 @@ Issues and PRs welcome. Please add a test for any behavior change — the engine
 
 More tools from the same author:
 
-- **[VectorStock CLI](https://github.com/Evangelikcaos/vector-stock-cli)** — sanitizes SVGs and auto-generates AI metadata for Adobe Stock, Freepik, and Shutterstock uploads.
+- **[VectorStock CLI](https://github.com/Evangelikcaos/vector-stock-cli)** — open-source CLI that sanitizes SVGs and auto-generates AI metadata for Adobe Stock, Freepik, and Shutterstock uploads.
 - **[ASTify](https://github.com/Evangelikcaos/AStify-app)** — AI-guided AST-based diff pruner that cuts LLM context tokens 70-80% in PR/CI code review.
 - **[ArtemisMock](https://github.com/Evangelikcaos/ArtemisMock-app)** — fully local, AI-guided real-time mock API server generated from OpenAPI/Prisma schemas.
 - **[ChronosGit](https://github.com/Evangelikcaos/ChronosGit-app)** — time-aware version control that blocks commits/pushes before expiring code reaches production.
-- **[VectorStock CLI](https://github.com/Evangelikcaos/vector-stock-cli)** — open-source CLI: sanitizes SVGs and auto-generates AI metadata for stock marketplace uploads.

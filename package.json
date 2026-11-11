@@ -57,20 +57,10 @@
     "url": "https://github.com/Evangelikcaos/local-vector-sync/issues"
   },
   "homepage": "https://github.com/Evangelikcaos/local-vector-sync#readme",
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/Evangelikcaos"
-    },
-    {
-      "type": "open_collective",
-      "url": "https://opencollective.com/local-vector-sync"
-    },
-    {
-      "type": "buy_me_a_coffee",
-      "url": "https://www.buymeacoffee.com/evangelikcaos"
-    }
-  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Evangelikcaos"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.699.0"
   },

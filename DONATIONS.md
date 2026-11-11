@@ -1,24 +1,10 @@
 # Supporting LocalVectorSync
 
-LocalVectorSync is maintained as a community-funded, 100% open-source (MIT) project. There is no paid tier and no plan to add one — every capability described in the README is, and will remain, free. Donations and sponsorships fund the time spent maintaining it: triaging issues, reviewing PRs, keeping dependencies (and the security surface of the encryption/sync code in particular) current, and building the roadmap below.
+LocalVectorSync is maintained as a community-funded, 100% open-source (MIT) project. There is no paid tier and no plan to add one — every capability described in the README is, and will remain, free.
 
 ## Ways to contribute financially
 
-| Platform | Best for |
-|---|---|
-| **[GitHub Sponsors](https://github.com/sponsors/Evangelikcaos)** | Individual developers who want recurring or one-time support with zero platform fee taken from the maintainer's side. |
-| **[Open Collective](https://opencollective.com/local-vector-sync)** | Companies that need a transparent, auditable ledger of funds in and out, and/or an invoice for accounting. |
-| **[Buy Me a Coffee](https://www.buymeacoffee.com/evangelikcaos)** | A quick, no-account-needed one-off thank-you. |
-| **[PayPal](https://www.paypal.com/ncp/payment/KN78NFJJBQFEY)** | A direct one-off donation for anyone who already has PayPal and doesn't need a platform account or receipt. |
-
-All four are linked from the repository's "Sponsor" button (via `.github/FUNDING.yml`) and from the README.
-
-## What sponsors get
-
-- **Priority triage.** Sponsor-filed issues are labeled and looked at first.
-- **Public recognition.** Sponsors (who opt in) are listed by name/avatar in the README's Sponsors section and in release notes for versions their sponsorship period covers.
-- **A say in the roadmap.** Sponsors at the "Backer" tier and above can propose and vote on which roadmap item below gets prioritized next via a pinned GitHub Discussion.
-- **Direct access.** A private sponsor-only Discussion category for questions, integration help, and early looks at pre-release builds.
+**[GitHub Sponsors](https://github.com/sponsors/Evangelikcaos)** is the only funding channel currently set up for this project. (Open Collective, Buy Me a Coffee, and a previously-listed PayPal link were removed from this page and from the README — they either pointed nowhere or, in PayPal's case, charged for an unrelated paid product, not a donation to this project.)
 
 ## Roadmap this funds
 
